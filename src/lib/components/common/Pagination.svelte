@@ -7,7 +7,7 @@
 
 	export let page = 0;
 	export let count = 0;
-	export let perPage = 16;
+	export let perPage = 20;
 </script>
 
 <div class="flex justify-center">

@@ -2,8 +2,12 @@ import time
 from typing import Optional
 
 from open_webui.internal.db import Base, JSONField, get_db
+
+
 from open_webui.models.chats import Chats
 from open_webui.models.groups import Groups
+
+
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import BigInteger, Column, String, Text
 
@@ -16,7 +20,6 @@ class User(Base):
     __tablename__ = "user"
 
     id = Column(String, primary_key=True)
-    data_permission_level = Column(BigInteger)
     name = Column(String)
     email = Column(String)
     role = Column(String)
@@ -41,7 +44,6 @@ class UserSettings(BaseModel):
 
 class UserModel(BaseModel):
     id: str
-    data_permission_level: int = 0
     name: str
     email: str
     role: str = "pending"
@@ -85,11 +87,6 @@ class UserRoleUpdateForm(BaseModel):
     role: str
 
 
-class UserDataPermissionUpdateForm(BaseModel):
-    id: str
-    data_permission_level: int
-
-
 class UserUpdateForm(BaseModel):
     name: str
     email: str
@@ -103,7 +100,6 @@ class UsersTable:
         id: str,
         name: str,
         email: str,
-        data_permission_level: int = 0,
         profile_image_url: str = "/user.png",
         role: str = "pending",
         oauth_sub: Optional[str] = None,
@@ -112,7 +108,6 @@ class UsersTable:
             user = UserModel(
                 **{
                     "id": id,
-                    "data_permission_level": data_permission_level,
                     "name": name,
                     "email": email,
                     "role": role,
@@ -168,6 +163,7 @@ class UsersTable:
         self, skip: Optional[int] = None, limit: Optional[int] = None
     ) -> list[UserModel]:
         with get_db() as db:
+
             query = db.query(User).order_by(User.created_at.desc())
 
             if skip:
@@ -216,20 +212,6 @@ class UsersTable:
         try:
             with get_db() as db:
                 db.query(User).filter_by(id=id).update({"role": role})
-                db.commit()
-                user = db.query(User).filter_by(id=id).first()
-                return UserModel.model_validate(user)
-        except Exception:
-            return None
-
-    def update_user_permission_by_id(
-        self, id: str, data_permission_level: int
-    ) -> Optional[UserModel]:
-        try:
-            with get_db() as db:
-                db.query(User).filter_by(id=id).update(
-                    {"data_permission_level": data_permission_level}
-                )
                 db.commit()
                 user = db.query(User).filter_by(id=id).first()
                 return UserModel.model_validate(user)

@@ -53,7 +53,7 @@
 			<div class="text-sm dark:text-gray-200">{$i18n.t('Release Notes')}</div>
 			<div class="flex self-center w-[1px] h-6 mx-2.5 bg-gray-200 dark:bg-gray-700" />
 			<div class="text-sm dark:text-gray-200">
-				v{Object.keys(changelog).length > 0 ? Object.keys(changelog)[0]: WEBUI_VERSION}
+				v{WEBUI_VERSION}
 			</div>
 		</div>
 	</div>
