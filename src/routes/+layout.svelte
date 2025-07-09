@@ -615,6 +615,7 @@
 	<link rel="stylesheet" type="text/css" href="/themes/rosepine-dawn.css" /> -->
 </svelte:head>
 
+
 {#if loaded}
 	{#if $isApp}
 		<div class="flex flex-row h-screen">
@@ -625,7 +626,16 @@
 			</div>
 		</div>
 	{:else}
-		<slot />
+		
+
+		<div class="flex flex-col h-screen">
+			<div style="width:100%;height:56px;background-color:#E61F23;padding-top:16px">
+				<img src={`${WEBUI_BASE_URL}/AccelBrain.png`} style="width:160px;height:24px; margin-left:45px;cursor:pointer" alt="logo" on:click={() => {
+					window.location.href = `${WEBUI_BASE_URL}/`;
+				}}/>
+			</div>
+			<slot />
+		</div>
 	{/if}
 {/if}
 

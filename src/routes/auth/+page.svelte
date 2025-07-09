@@ -153,6 +153,11 @@
 		} else {
 			onboarding = $config?.onboarding ?? false;
 		}
+
+		if (onboarding) {
+			onboarding=false;
+			mode = $config?.features.enable_ldap ? 'ldap' : 'signup';
+		}
 	});
 </script>
 
@@ -162,16 +167,16 @@
 	</title>
 </svelte:head>
 
-<OnBoarding
+<!-- <OnBoarding
 	bind:show={onboarding}
 	getStartedHandler={() => {
 		onboarding = false;
 		mode = $config?.features.enable_ldap ? 'ldap' : 'signup';
 	}}
-/>
+/> -->
 
-<div class="w-full h-screen max-h-[100dvh] text-white relative">
-	<div class="w-full h-full absolute top-0 left-0 bg-white dark:bg-black"></div>
+<div class="w-full h-[calc(100dvh-56px)] max-h-[calc(100dvh-56px)] text-white relative">
+	<div class="w-full h-[calc(100dvh-56px)] absolute top-0 left-0 bg-red dark:bg-black"></div>
 
 	<div class="w-full absolute top-0 left-0 right-0 h-8 drag-region" />
 
@@ -182,8 +187,8 @@
 					<img
 						id="logo"
 						crossorigin="anonymous"
-						src="{WEBUI_BASE_URL}/static/splash.png"
-						class=" w-6 rounded-full"
+						src="{WEBUI_BASE_URL}/static/Robot_01.png"
+						class=" w-[40px] h-[40px]  rounded-full"
 						alt="logo"
 					/>
 				</div>
@@ -191,9 +196,9 @@
 		</div>
 
 		<div
-			class="fixed bg-transparent min-h-screen w-full flex justify-center font-primary z-50 text-black dark:text-white"
+			class="fixed bg-transparent min-h-[calc(100dvh-56px)] w-full flex justify-center font-primary z-50 text-black dark:text-white"
 		>
-			<div class="w-full sm:max-w-md px-10 min-h-screen flex flex-col text-center">
+			<div class="w-full sm:max-w-md px-10 min-h-[calc(100dvh-56px)] flex flex-col text-center">
 				{#if ($config?.features.auth_trusted_header ?? false) || $config?.features.auth === false}
 					<div class=" my-auto pb-10 w-full">
 						<div

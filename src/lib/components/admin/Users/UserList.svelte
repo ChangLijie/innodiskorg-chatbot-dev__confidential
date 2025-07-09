@@ -97,7 +97,7 @@
 			if (a[sortKey] > b[sortKey]) return sortOrder === 'asc' ? 1 : -1;
 			return 0;
 		})
-		.slice((page - 1) * 20, page * 20);
+		.slice((page - 1) * 15, page * 15);
 </script>
 
 <ConfirmDialog
