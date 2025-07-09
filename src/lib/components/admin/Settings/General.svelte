@@ -1,4 +1,6 @@
 <script lang="ts">
+	import DOMPurify from 'dompurify';
+
 	import { getBackendConfig, getVersionUpdates, getWebhookUrl, updateWebhookUrl } from '$lib/apis';
 	import {
 		getAdminConfig,
@@ -47,20 +49,6 @@
 		ciphers: ''
 	};
 
-	const checkForVersionUpdates = async () => {
-		updateAvailable = null;
-		version = await getVersionUpdates(localStorage.token).catch((error) => {
-			return {
-				current: WEBUI_VERSION,
-				latest: WEBUI_VERSION
-			};
-		});
-
-		console.log(version);
-
-		updateAvailable = compareVersion(version.latest, version.current);
-		console.log(updateAvailable);
-	};
 
 	const updateLdapServerHandler = async () => {
 		if (!ENABLE_LDAP) return;
@@ -86,7 +74,6 @@
 	};
 
 	onMount(async () => {
-		checkForVersionUpdates();
 
 		await Promise.all([
 			(async () => {
@@ -112,10 +99,41 @@
 		updateHandler();
 	}}
 >
-	<div class="mt-0.5 space-y-3 overflow-y-scroll scrollbar-hidden 95vh">
+	<div class="mt-0.5 space-y-3 overflow-y-scroll scrollbar-hidden h-full">
 		{#if adminConfig !== null}
 			<div class="">
-				
+				<div class="mb-3.5">
+					<div class=" mb-2.5 text-base font-medium">{$i18n.t('General')}</div>
+
+					<hr class=" border-gray-100 dark:border-gray-850 my-2" />
+
+					<div class="mb-2.5">
+						<div class=" mb-1 text-xs font-medium flex space-x-2 items-center">
+							<div>
+								{$i18n.t('Version')}
+							</div>
+						</div>
+						<div class="flex w-full justify-between items-center">
+							<div class="flex flex-col text-xs text-gray-700 dark:text-gray-200">
+								<div class="flex gap-1">
+									<Tooltip content={WEBUI_BUILD_HASH}>
+										v{WEBUI_VERSION}
+									</Tooltip>								
+								</div>
+
+								<button
+									class=" underline flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-500"
+									type="button"
+									on:click={() => {
+										showChangelog.set(true);
+									}}
+								>
+									<div>{$i18n.t("See what's new")}</div>
+								</button>
+							</div>							
+						</div>
+					</div>
+				</div>
 
 				<div class="mb-3">
 					<div class=" mb-2.5 text-base font-medium">{$i18n.t('Authentication')}</div>
@@ -215,7 +233,7 @@
 						</div>
 					</div>
 
-					<!-- <div class=" space-y-3">
+					<div class=" space-y-3">
 						<div class="mt-2 space-y-2 pr-1.5">
 							<div class="flex justify-between items-center text-sm">
 								<div class="  font-medium">{$i18n.t('LDAP')}</div>
@@ -400,7 +418,6 @@
 													</div>
 													<input
 														class="w-full bg-transparent outline-hidden py-0.5"
-														required
 														placeholder={$i18n.t('Enter certificate path')}
 														bind:value={LDAP_SERVER.certificate_path}
 													/>
@@ -426,22 +443,14 @@
 								</div>
 							{/if}
 						</div>
-					</div> -->
+					</div>
 				</div>
 
 				<div class="mb-3">
 					<div class=" mb-2.5 text-base font-medium">{$i18n.t('Features')}</div>
 
 					<hr class=" border-gray-100 dark:border-gray-850 my-2" />
-
-					<!-- <div class="mb-2.5 flex w-full items-center justify-between pr-2">
-						<div class=" self-center text-xs font-medium">
-							{$i18n.t('Enable Community Sharing')}
-						</div>
-
-						<Switch bind:state={adminConfig.ENABLE_COMMUNITY_SHARING} />
-					</div> -->
-
+					
 					<div class="mb-2.5 flex w-full items-center justify-between pr-2">
 						<div class=" self-center text-xs font-medium">{$i18n.t('Enable Message Rating')}</div>
 
@@ -454,6 +463,14 @@
 						</div>
 
 						<Switch bind:state={adminConfig.ENABLE_CHANNELS} />
+					</div>
+
+					<div class="mb-2.5 flex w-full items-center justify-between pr-2">
+						<div class=" self-center text-xs font-medium">
+							{$i18n.t('User Webhooks')}
+						</div>
+
+						<Switch bind:state={adminConfig.ENABLE_USER_WEBHOOKS} />
 					</div>
 
 					<div class="mb-2.5 w-full justify-between">

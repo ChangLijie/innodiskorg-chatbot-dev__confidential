@@ -77,6 +77,7 @@
 	let allChatsLoaded = false;
 
 	let folders = {};
+	let newFolderId = null;
 
 	const initFolders = async () => {
 		const folderList = await getFolders(localStorage.token).catch((error) => {
@@ -90,6 +91,11 @@
 		for (const folder of folderList) {
 			// Ensure folder is added to folders with its data
 			folders[folder.id] = { ...(folders[folder.id] || {}), ...folder };
+
+			if (newFolderId && folder.id === newFolderId) {
+				folders[folder.id].new = true;
+				newFolderId = null;
+			}
 		}
 
 		// Second pass: Tie child folders to their parents
@@ -150,6 +156,7 @@
 		});
 
 		if (res) {
+			newFolderId = res.id;
 			await initFolders();
 		}
 	};
@@ -439,7 +446,7 @@
 		});
 
 		if (res) {
-			$socket.emit('join-channels', { auth: { token: $user.token } });
+			$socket.emit('join-channels', { auth: { token: $user?.token } });
 			await initChannels();
 			showCreateChannel = false;
 		}
@@ -452,7 +459,7 @@
 	<div
 		class=" {$isApp
 			? ' ml-[4.5rem] md:ml-0'
-			: ''} fixed md:hidden z-40 top-0 right-0 left-0 bottom-40 bg-black/60 w-full min-h-[calc(100vh-56px)] h-[calc(100vh-56px)] flex justify-center overflow-hidden overscroll-contain"
+			: ''} fixed md:hidden z-40 top-0 right-0 left-0 bottom-0 bg-black/60 w-full min-h-full h-full flex justify-center overflow-hidden overscroll-contain"
 		on:mousedown={() => {
 			showSidebar.set(!$showSidebar);
 		}}
@@ -462,7 +469,7 @@
 <div
 	bind:this={navElement}
 	id="sidebar"
-	class="h-screen max-h-[100dvh] min-h-screen select-none {$showSidebar
+	class="h-full max-h-[calc(100dvh-56px)] min-h-full select-none {$showSidebar
 		? 'md:relative w-[260px] max-w-[260px]'
 		: '-translate-x-[260px] w-[0px]'} {$isApp
 		? `ml-[4.5rem] md:ml-0 `
@@ -471,7 +478,7 @@
 	data-state={$showSidebar}
 >
 	<div
-		class="py-2 my-auto flex flex-col justify-between h-screen max-h-[calc(100vh-56px)] w-[260px] overflow-x-hidden z-50 {$showSidebar
+		class="py-2 my-auto flex flex-col justify-between h-full max-h-[calc(100dvh-56px)] min-h-[calc(100dvh-56px)] w-[260px] overflow-x-hidden z-50 {$showSidebar
 			? ''
 			: 'invisible'}"
 	>
@@ -502,7 +509,7 @@
 
 			<a
 				id="sidebar-new-chat-button"
-				class="flex justify-between items-center flex-1 rounded-lg px-2 py-1 h-full text-right hover:bg-gray-100 dark:hover:bg-gray-900 transition no-drag-region"
+				class="flex justify-between items-center flex-1 rounded-lg px-2 py-0 h-full text-right hover:bg-gray-100 dark:hover:bg-gray-900 transition no-drag-region"
 				href="/"
 				draggable="false"
 				on:click={async () => {
@@ -521,12 +528,12 @@
 					<div class="self-center mx-1.5">
 						<img
 							crossorigin="anonymous"
-							src="{WEBUI_BASE_URL}/Robot_04.png"
-							class=" size-5 -translate-x-1.5 rounded-lg"
+							src="{WEBUI_BASE_URL}/static/Robot_04_v2.png"
+							class=" size-6 -translate-x-1.5 rounded-full"
 							alt="logo"
 						/>
 					</div>
-					<div class=" self-center font-medium text-sm text-gray-850 dark:text-white font-primary">
+					<div class=" self-center font-medium text-sm text-gray-850 dark:text-white font-primary mt-1">
 						{$i18n.t('New Chat')}
 					</div>
 				</div>
@@ -611,6 +618,7 @@
 				bind:value={search}
 				on:input={searchDebounceHandler}
 				placeholder={$i18n.t('Search')}
+				showClearButton={true}
 			/>
 		</div>
 
@@ -619,13 +627,13 @@
 				? 'opacity-20'
 				: ''}"
 		>
-			{#if $config?.features?.enable_channels && ($user.role === 'admin' || $channels.length > 0) && !search}
+			{#if $config?.features?.enable_channels && ($user?.role === 'admin' || $channels.length > 0) && !search}
 				<Folder
 					className="px-2 mt-0.5"
 					name={$i18n.t('Channels')}
 					dragAndDrop={false}
 					onAdd={async () => {
-						if ($user.role === 'admin') {
+						if ($user?.role === 'admin') {
 							await tick();
 
 							setTimeout(() => {
@@ -883,9 +891,9 @@
 
 		<div class="px-2">
 			<div class="flex flex-col font-primary">
-				{#if $user !== undefined}
+				{#if $user !== undefined && $user !== null}
 					<UserMenu
-						role={$user.role}
+						role={$user?.role}
 						on:show={(e) => {
 							if (e.detail === 'archived-chat') {
 								showArchivedChats.set(true);
@@ -900,12 +908,12 @@
 						>
 							<div class=" self-center mr-3">
 								<img
-									src={$user.profile_image_url}
+									src={$user?.profile_image_url}
 									class=" max-w-[30px] object-cover rounded-full"
 									alt="User profile"
 								/>
 							</div>
-							<div class=" self-center font-medium">{$user.name}</div>
+							<div class=" self-center font-medium">{$user?.name}</div>
 						</button>
 					</UserMenu>
 				{/if}

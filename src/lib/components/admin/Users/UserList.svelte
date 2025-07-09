@@ -28,6 +28,8 @@
 	import ChevronUp from '$lib/components/icons/ChevronUp.svelte';
 	import ChevronDown from '$lib/components/icons/ChevronDown.svelte';
 	import About from '$lib/components/chat/Settings/About.svelte';
+	import Banner from '$lib/components/common/Banner.svelte';
+	import Markdown from '$lib/components/chat/Messages/Markdown.svelte';
 
 	const i18n = getContext('i18n');
 
@@ -95,7 +97,7 @@
 			if (a[sortKey] > b[sortKey]) return sortOrder === 'asc' ? 1 : -1;
 			return 0;
 		})
-		.slice((page - 1) * 16, page * 16);
+		.slice((page - 1) * 15, page * 15);
 </script>
 
 <ConfirmDialog
@@ -124,12 +126,43 @@
 />
 <UserChatsModal bind:show={showUserChatsModal} user={selectedUser} />
 
+{#if ($config?.license_metadata?.seats ?? null) !== null && users.length > $config?.license_metadata?.seats}
+	<div class=" mt-1 mb-2 text-xs text-red-500">
+		<Banner
+			className="mx-0"
+			banner={{
+				type: 'error',
+				title: 'License Error',
+				content:
+					'Exceeded the number of seats in your license. Please contact support to increase the number of seats.',
+				dismissable: true
+			}}
+		/>
+	</div>
+{/if}
+
 <div class="mt-0.5 mb-2 gap-1 flex flex-col md:flex-row justify-between">
 	<div class="flex md:self-center text-lg font-medium px-0.5">
-		{$i18n.t('Users')}
+		<div class="flex-shrink-0">
+			{$i18n.t('Users')}
+		</div>
 		<div class="flex self-center w-[1px] h-6 mx-2.5 bg-gray-50 dark:bg-gray-850" />
 
-		<span class="text-lg font-medium text-gray-500 dark:text-gray-300">{users.length}</span>
+		{#if ($config?.license_metadata?.seats ?? null) !== null}
+			{#if users.length > $config?.license_metadata?.seats}
+				<span class="text-lg font-medium text-red-500"
+					>{users.length} of {$config?.license_metadata?.seats}
+					<span class="text-sm font-normal">available users</span></span
+				>
+			{:else}
+				<span class="text-lg font-medium text-gray-500 dark:text-gray-300"
+					>{users.length} of {$config?.license_metadata?.seats}
+					<span class="text-sm font-normal">available users</span></span
+				>
+			{/if}
+		{:else}
+			<span class="text-lg font-medium text-gray-500 dark:text-gray-300">{users.length}</span>
+		{/if}
 	</div>
 
 	<div class="flex gap-1">
@@ -454,3 +487,27 @@
 </div>
 
 <Pagination bind:page count={users.length} />
+
+{#if !$config?.license_metadata}
+	{#if users.length > 50}
+		<div class="text-sm">
+			<Markdown
+				content={`
+> [!NOTE]
+> # **Hey there! 👋**
+>
+> It looks like you have over 50 users — that usually falls under organizational usage.
+> 
+> Open WebUI is proudly open source and completely free, with no hidden limits — and we'd love to keep it that way. 🌱  
+>
+> By supporting the project through sponsorship or an enterprise license, you’re not only helping us stay independent, you’re also helping us ship new features faster, improve stability, and grow the project for the long haul. With an *enterprise license*, you also get additional perks like dedicated support, customization options, and more — all at a fraction of what it would cost to build and maintain internally.  
+> 
+> Your support helps us stay independent and continue building great tools for everyone. 💛
+> 
+> - 👉 **[Click here to learn more about enterprise licensing](https://docs.openwebui.com/enterprise)**
+> - 👉 *[Click here to sponsor the project on GitHub](https://github.com/sponsors/tjbck)*
+`}
+			/>
+		</div>
+	{/if}
+{/if}

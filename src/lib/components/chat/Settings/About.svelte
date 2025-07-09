@@ -5,7 +5,6 @@
 	import { WEBUI_NAME, config, showChangelog } from '$lib/stores';
 	import { compareVersion } from '$lib/utils';
 	import { onMount, getContext } from 'svelte';
-	import { getChangelog } from '$lib/apis';
 
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
 
@@ -19,32 +18,10 @@
 		latest: ''
 	};
 
-	const checkForVersionUpdates = async () => {
-		updateAvailable = null;
-		version = await getVersionUpdates(localStorage.token).catch((error) => {
-			return {
-				current: WEBUI_VERSION,
-				latest: WEBUI_VERSION
-			};
-		});
-
-		console.log(version);
-
-		updateAvailable = compareVersion(version.latest, version.current);
-		console.log(updateAvailable);
-	};
-
-	let changelog = null;
-
 	onMount(async () => {
 		ollamaVersion = await getOllamaVersion(localStorage.token).catch((error) => {
 			return '';
 		});
-
-		const res = await getChangelog();
-		changelog = res;
-
-		//checkForVersionUpdates();
 	});
 </script>
 
@@ -60,20 +37,40 @@
 			<div class="flex w-full justify-between items-center">
 				<div class="flex flex-col text-xs text-gray-700 dark:text-gray-200">
 					<div class="flex gap-1">
-						
-						v{(changelog)?Object.keys(changelog).length > 0 ? Object.keys(changelog)[0]: WEBUI_VERSION: WEBUI_VERSION}
-						
+						<Tooltip content={WEBUI_BUILD_HASH}>
+							v{WEBUI_VERSION}
+						</Tooltip>						
 					</div>
-				</div>
-				<button
-					class=" underline flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-500"
-					on:click={() => {
-						showChangelog.set(true);
-					}}
-				>
-					<div>{$i18n.t("See what's new")}</div>
-				</button>
+
+					<button
+						class=" underline flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-500"
+						on:click={() => {
+							showChangelog.set(true);
+						}}
+					>
+						<div>{$i18n.t("See what's new")}</div>
+					</button>
+				</div>				
 			</div>
 		</div>
+
+		{#if ollamaVersion}
+			<hr class=" border-gray-100 dark:border-gray-850" />
+
+			<div>
+				<div class=" mb-2.5 text-sm font-medium">{$i18n.t('Ollama Version')}</div>
+				<div class="flex w-full">
+					<div class="flex-1 text-xs text-gray-700 dark:text-gray-200">
+						{ollamaVersion ?? 'N/A'}
+					</div>
+				</div>
+			</div>
+		{/if}
+
+		<hr class=" border-gray-100 dark:border-gray-850" />
+
+	
+
+	
 	</div>
 </div>

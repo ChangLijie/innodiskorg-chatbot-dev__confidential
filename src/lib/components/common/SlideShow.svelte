@@ -19,7 +19,7 @@
 
 {#each imageUrls as imageUrl, idx (idx)}
 	<div
-		class="image w-full h-full absolute top-0 left-0 bg-cover bg-center transition-opacity duration-1000"
+		class="image w-full h-full absolute top-[56px] left-0 bg-cover bg-center transition-opacity duration-1000"
 		style="opacity: {selectedImageIdx === idx ? 1 : 0}; background-image: url('{imageUrl}')"
 	></div>
 {/each}
@@ -27,7 +27,7 @@
 <style>
 	.image {
 		position: absolute;
-		top: 0;
+		top: 56px;
 		left: 0;
 		width: 100%;
 		height: 100%;

@@ -1,7 +1,7 @@
 <script>
 	import { toast } from 'svelte-sonner';
 
-	import { onMount, getContext } from 'svelte';
+	import { onMount, getContext, tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
@@ -115,38 +115,48 @@
 
 	let onboarding = false;
 
+	async function setLogoImage() {
+		await tick();
+		const logo = document.getElementById('logo');
+
+		if (logo) {
+			const isDarkMode = document.documentElement.classList.contains('dark');
+
+			if (isDarkMode) {
+				const darkImage = new Image();
+				darkImage.src = '/static/favicon-dark.png';
+
+				darkImage.onload = () => {
+					logo.src = '/static/favicon-dark.png';
+					logo.style.filter = ''; // Ensure no inversion is applied if favicon-dark.png exists
+				};
+
+				darkImage.onerror = () => {
+					logo.style.filter = 'invert(1)'; // Invert image if favicon-dark.png is missing
+				};
+			}
+		}
+	}
+
 	onMount(async () => {
 		if ($user !== undefined) {
-			await goto('/');
+			const redirectPath = querystringValue('redirect') || '/';
+			goto(redirectPath);
 		}
 		await checkOauthCallback();
 
 		loaded = true;
+		setLogoImage();
+
 		if (($config?.features.auth_trusted_header ?? false) || $config?.features.auth === false) {
 			await signInHandler();
 		} else {
-			//onboarding = $config?.onboarding ?? false;
+			onboarding = $config?.onboarding ?? false;
+		}
 
-			onboarding = false;
-			//mode = $config?.features.enable_ldap ? 'ldap' : 'signup';
-
-			if ($config?.onboarding ?? false) {
-				mode='signup';
-			}else{
-				mode='signin';
-			}
-
-			// if (onboarding===false){
-			// 	mode='singin';
-			// 	//mode = $config?.features.enable_ldap ? 'ldap' : 'signup';
-			// }else{
-			// 	//mode = $config?.features.enable_ldap ? 'ldap' : 'signup';
-			// 	//mode='singin';
-			// 	mode='signup';
-			// }
-
-			console.log('onMount - onboarding', onboarding);
-			console.log('onMount - mode', mode);
+		if (onboarding) {
+			onboarding=false;
+			mode = $config?.features.enable_ldap ? 'ldap' : 'signup';
 		}
 	});
 </script>
@@ -157,19 +167,16 @@
 	</title>
 </svelte:head>
 
-<OnBoarding
+<!-- <OnBoarding
 	bind:show={onboarding}
 	getStartedHandler={() => {
 		onboarding = false;
 		mode = $config?.features.enable_ldap ? 'ldap' : 'signup';
-
-		console.log('onClick - onboarding', onboarding);
-		console.log('onClick - mode', mode);
 	}}
-/>
+/> -->
 
-<div class="w-full h-screen max-h-[100dvh] text-white relative">
-	<div class="w-full h-full absolute top-0 left-0 bg-white dark:bg-black"></div>
+<div class="w-full h-[calc(100dvh-56px)] max-h-[calc(100dvh-56px)] text-white relative">
+	<div class="w-full h-[calc(100dvh-56px)] absolute top-0 left-0 bg-red dark:bg-black"></div>
 
 	<div class="w-full absolute top-0 left-0 right-0 h-8 drag-region" />
 
@@ -178,9 +185,10 @@
 			<div class="flex space-x-2">
 				<div class=" self-center">
 					<img
+						id="logo"
 						crossorigin="anonymous"
-						src="{WEBUI_BASE_URL}/static/splash.png"
-						class=" w-6 rounded-full dark:invert"
+						src="{WEBUI_BASE_URL}/static/Robot_01.png"
+						class=" w-[40px] h-[40px]  rounded-full"
 						alt="logo"
 					/>
 				</div>
@@ -188,9 +196,9 @@
 		</div>
 
 		<div
-			class="fixed bg-transparent min-h-screen w-full flex justify-center font-primary z-50 text-black dark:text-white"
+			class="fixed bg-transparent min-h-[calc(100dvh-56px)] w-full flex justify-center font-primary z-50 text-black dark:text-white"
 		>
-			<div class="w-full sm:max-w-md px-10 min-h-screen flex flex-col text-center">
+			<div class="w-full sm:max-w-md px-10 min-h-[calc(100dvh-56px)] flex flex-col text-center">
 				{#if ($config?.features.auth_trusted_header ?? false) || $config?.features.auth === false}
 					<div class=" my-auto pb-10 w-full">
 						<div

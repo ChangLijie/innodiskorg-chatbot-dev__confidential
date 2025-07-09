@@ -115,7 +115,7 @@
 		<span class="text-lg font-medium text-gray-500 dark:text-gray-300">{feedbacks.length}</span>
 	</div>
 
-	<div>
+	{#if feedbacks.length > 0}
 		<div>
 			<Tooltip content={$i18n.t('Export')}>
 				<button
@@ -128,7 +128,7 @@
 				</button>
 			</Tooltip>
 		</div>
-	</div>
+	{/if}
 </div>
 
 <div
@@ -253,30 +253,7 @@
 	<div class=" flex flex-col justify-end w-full text-right gap-1">
 		<div class="line-clamp-1 text-gray-500 text-xs">
 			{$i18n.t('Help us create the best community leaderboard by sharing your feedback history!')}
-		</div>
-
-		<div class="flex space-x-1 ml-auto">
-			<Tooltip
-				content={$i18n.t(
-					'To protect your privacy, only ratings, model IDs, tags, and metadata are shared from your feedback—your chat logs remain private and are not included.'
-				)}
-			>
-				<button
-					class="flex text-xs items-center px-3 py-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-850 dark:hover:bg-gray-800 dark:text-gray-200 transition"
-					on:click={async () => {
-						shareHandler();
-					}}
-				>
-					<div class=" self-center mr-2 font-medium line-clamp-1">
-						{$i18n.t('Share to Open WebUI Community')}
-					</div>
-
-					<div class=" self-center">
-						<CloudArrowUp className="size-3" strokeWidth="3" />
-					</div>
-				</button>
-			</Tooltip>
-		</div>
+		</div>		
 	</div>
 {/if}
 
